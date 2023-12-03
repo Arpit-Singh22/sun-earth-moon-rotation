@@ -1,4 +1,8 @@
 import * as THREE from "three";
+import GUI from "lil-gui";
+import { AxisGridHelper } from "./axisGridHelper.js";
+
+const gui = new GUI();
 
 const scene = new THREE.Scene();
 const objects = [];
@@ -66,7 +70,7 @@ scene.add(camera);
 
 // single point light in center of sun
 const color = 0xffffff;
-const intensity = 3;
+const intensity = 500;
 const light = new THREE.PointLight(color, intensity);
 scene.add(light);
 
@@ -74,23 +78,23 @@ const canvas = document.querySelector("canvas.threejs");
 const renderer = new THREE.WebGLRenderer({ canvas });
 renderer.setSize(window.innerWidth, window.innerHeight);
 
-objects.forEach((node) => {
-  const axes = new THREE.AxesHelper();
-  axes.material.depthTest = false;
-  axes.renderOrder = 1;
-  node.add(axes);
-});
+// add an AxesHelper to each node
+const makeAxisGrid = (node, label, units) => {
+  const helper = new AxisGridHelper(node, units);
+  gui.add(helper, "visible").name(label);
+};
+makeAxisGrid(solarSystem, "SolarSystem", 25);
+makeAxisGrid(sunMesh, "sunMesh");
+makeAxisGrid(earthOrbit, "earthOrbit");
+makeAxisGrid(earthMesh, "earthMesh");
+makeAxisGrid(moonOrbit, "moonOrbit");
+makeAxisGrid(moonMesh, "moonMesh");
+
 const render = (time) => {
   time *= 0.001;
   objects.forEach((obj) => {
     obj.rotation.y = time;
-    // // Adjust emissive intensity based on time
-    // if (obj.material && obj.material.emissive) {
-    //   obj.material.emissiveIntensity = Math.abs(Math.sin(time * 2));
-    // }
   });
-
-  // add an AxesHelper to each node
 
   renderer.render(scene, camera);
   window.requestAnimationFrame(render);
